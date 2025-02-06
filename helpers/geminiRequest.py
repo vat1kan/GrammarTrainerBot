@@ -2,7 +2,7 @@ import google.generativeai as genai
 import json
 import os
 
-async def gemini_requst(type):
+async def getContent(type):
     genai.configure(api_key=os.getenv('geminiToken'))
     model = genai.GenerativeModel("gemini-1.5-flash")
     if type == 'test':
@@ -25,7 +25,7 @@ async def gemini_requst(type):
     elif type == 'word':
         response = model.generate_content(
             f"""
-            You are a JSON generator for a unique English vocabulary word of level A1-C1.  
+            You are a JSON generator for a unique English vocabulary word of level A1-B2.  
             Provide a completely unique and original English word each time, ensuring that it is different from previous ones.  
             The word can belong to any part of speech (noun, verb, adjective, etc.).  
             Generate only a valid JSON object, without any conversational text, in the following format:
