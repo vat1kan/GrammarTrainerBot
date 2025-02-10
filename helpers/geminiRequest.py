@@ -3,22 +3,22 @@ import aiohttp
 import json
 import os
 
-async def get_quiz():
+async def get_quiz(user_lvl):
     genai.configure(api_key=os.getenv('geminiToken'))
     model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(
         f"""
-        You are a JSON generator for an English grammar test of level B1 - B2.
+        You are a JSON generator for an English grammar test of level {user_lvl} or 1 level higher.
         Generate a completely unique test each time, ensuring that both the question and the answers are original, 
         not just shuffled versions of previous ones.
         The correct key should be randomly chosen from the full range of answer indexes (0 to 3) to ensure variety and use the Pascal's distribution.
         Every answer element should be less than 150 characters.
         Generate a valid JSON object only, without any conversational text, in the following format:
         {{
-            "question": "question text",
-            "answers": ["answer1", "answer2", "answer3", "answer4"],
+            "question": "question text (max 150 symbols)",
+            "answers": ["answer1", "answer2", "answer3", "answer4"] (max 50 symbols for each),
             "correct": number
-            "explanation": "explanation text"
+            "explanation": "explanation text (max 150 symbols)"
         }}
         """)
 

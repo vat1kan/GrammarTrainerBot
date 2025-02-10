@@ -40,7 +40,7 @@ async def get_menu_keyboard_callback(callback: CallbackQuery):
 
 @router.callback_query(F.data == 'quiz')
 async def send_quiz(callback: CallbackQuery):
-    await create_quiz(bot=callback.bot, chat_id=callback.message.chat.id, menu = 1)
+    await create_quiz(bot=callback.bot, chat_id=callback.from_user.id, menu = 1)
     await callback.message.edit_reply_markup(reply_markup=None)
 
 
@@ -95,11 +95,11 @@ async def update_level(callback: CallbackQuery, callback_data: kb.LevelCallback)
                                         f'#lvl\n\nYour English level updated for {html.bold(callback_data.level)}.\n'
                                         f'\n{html.bold(html.link('EnglishGrammarBot','https://t.me/TestGrammarEnglishBot'))}',
                                         reply_markup=kb.main_menu)
+        await callback.message.edit_reply_markup(reply_markup=None)
         await msg_delete(callback.bot, callback.message.chat.id, callback.message.message_id)
     except Exception as e:
         await callback.message.answer(f"#error\n\nSorry, an error occured to proccess your bot status.\n\nTry one more time later.", reply_markup=kb.main_menu)
         print(f"Error to update level for user {callback.message.chat.id}:\n{e}")
-    await callback.message.edit_reply_markup(reply_markup=None)
 
 
 
@@ -129,19 +129,22 @@ async def auto_word_sending(bot: Bot):
 
 async def setup_cron_jobs(bot: Bot):
     schedule = {
-        "0 10 * * *": auto_quiz_sending,
-        "0 12 * * *": auto_word_sending,
-        "0 14 * * *": auto_quiz_sending,
-        "0 16 * * *": auto_word_sending,
-        "0 18 * * *": auto_quiz_sending,
-        "0 20 * * *": auto_word_sending,
+        # "0 10 * * *": auto_quiz_sending,
+        # "0 12 * * *": auto_word_sending,
+        # "0 14 * * *": auto_quiz_sending,
+        # "0 16 * * *": auto_word_sending,
+        # "0 18 * * *": auto_quiz_sending,
+        # "0 20 * * *": auto_word_sending,
     }
     for time, task in schedule.items():
         aiocron.crontab(time, func=lambda t=task: asyncio.create_task(t(bot)))
 
+# async def setup_cron_jobs(bot: Bot):
+#     aiocron.crontab("*/1 * * * *", func=lambda: asyncio.create_task(auto_quiz_sending(bot))) 
+
 
 async def create_quiz(bot: Bot, chat_id: int, menu: int):
-    data = await get_quiz()
+    data = await get_quiz(await rq.get_lvl(chat_id))
     try:
         await bot.send_poll(
             chat_id = chat_id,
