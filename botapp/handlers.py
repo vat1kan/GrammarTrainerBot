@@ -1,9 +1,10 @@
 import botapp.keyboards as kb
 import database.requests as rq
+import botapp.level_test as lt
 from helpers.geminiRequest import get_quiz, get_word
 from aiogram import  html, F, Router, Bot
 from aiogram.filters import Command, CommandStart
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, PollAnswer
 import aiocron
 import asyncio
 
@@ -12,7 +13,9 @@ router = Router()
 @router.message(CommandStart())
 async def command_start_handler(message: Message):
     await rq.set_user(message.from_user.id)
-    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!\n\nChose the menu category", reply_markup=kb.main_menu)
+    await message.answer(f"Hello, {html.bold(message.from_user.full_name)}!\n"
+                         "\nAdvice to take an English test first.\n"
+                         "\nChose the menu category", reply_markup=kb.main_menu)
     try:
         await msg_delete(message.bot, message.chat.id, message.message_id)
     except Exception as e:
@@ -86,6 +89,23 @@ async def upd_status(callback: CallbackQuery):
         print(f"Error to update status for user {callback.message.chat.id}:\n{e}")
     await callback.message.edit_reply_markup(reply_markup=None)
     
+@router.callback_query(F.data == 'level_test')
+async def level_test(callback: CallbackQuery):
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await lt.send_question(callback.bot, callback.message.chat.id, 0)
+
+
+@router.poll_answer()
+async def handle_poll_answer(poll_answer: PollAnswer, bot):
+    chat_id = poll_answer.user.id
+    if chat_id not in lt.user_data:
+        return
+    
+    question_index = lt.user_data[chat_id]["question_index"]
+    if poll_answer.option_ids[0] == lt.questions[question_index]["correct"]:
+        lt.user_data[chat_id]["score"] += 1
+    
+    await lt.send_question(bot, chat_id, question_index + 1)
 
 
 async def update_level(callback: CallbackQuery, callback_data: kb.LevelCallback):
@@ -100,7 +120,6 @@ async def update_level(callback: CallbackQuery, callback_data: kb.LevelCallback)
     except Exception as e:
         await callback.message.answer(f"#error\n\nSorry, an error occured to proccess your bot status.\n\nTry one more time later.", reply_markup=kb.main_menu)
         print(f"Error to update level for user {callback.message.chat.id}:\n{e}")
-
 
 
 async def msg_delete(bot, chat_id, message_id):
@@ -129,18 +148,15 @@ async def auto_word_sending(bot: Bot):
 
 async def setup_cron_jobs(bot: Bot):
     schedule = {
-        # "0 10 * * *": auto_quiz_sending,
-        # "0 12 * * *": auto_word_sending,
-        # "0 14 * * *": auto_quiz_sending,
-        # "0 16 * * *": auto_word_sending,
-        # "0 18 * * *": auto_quiz_sending,
-        # "0 20 * * *": auto_word_sending,
+        "0 10 * * *": auto_quiz_sending,
+        "0 12 * * *": auto_word_sending,
+        "0 14 * * *": auto_quiz_sending,
+        "0 16 * * *": auto_word_sending,
+        "0 18 * * *": auto_quiz_sending,
+        "0 20 * * *": auto_word_sending,
     }
     for time, task in schedule.items():
         aiocron.crontab(time, func=lambda t=task: asyncio.create_task(t(bot)))
-
-# async def setup_cron_jobs(bot: Bot):
-#     aiocron.crontab("*/1 * * * *", func=lambda: asyncio.create_task(auto_quiz_sending(bot))) 
 
 
 async def create_quiz(bot: Bot, chat_id: int, menu: int):
