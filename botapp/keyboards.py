@@ -15,15 +15,21 @@ menu_button = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Menu')]])
 main_menu = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='New Question', callback_data='quiz'),
                                                   InlineKeyboardButton(text='Get vocabulary ', callback_data='word')],
                                                   [InlineKeyboardButton(text='Change Level', callback_data='lvl'),
-                                                  InlineKeyboardButton(text='Change Status', callback_data='status')]])
+                                                  InlineKeyboardButton(text='Change Status', callback_data='status')],
+                                                  [InlineKeyboardButton(text='English Level Test', callback_data='level_test')]])
 
 lvls = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='A1', callback_data = LevelCallback(level='A1').pack()),
-                                            InlineKeyboardButton(text='A2 ', callback_data = LevelCallback(level='A2').pack())],
+                                            InlineKeyboardButton(text='A2', callback_data = LevelCallback(level='A2').pack())],
                                             [InlineKeyboardButton(text='B1', callback_data = LevelCallback(level='B1').pack()),
                                             InlineKeyboardButton(text='B2', callback_data = LevelCallback(level='B2').pack())],
                                             [InlineKeyboardButton(text='C1', callback_data = LevelCallback(level='C1').pack()),
                                             InlineKeyboardButton(text='C2', callback_data = LevelCallback(level='C2').pack())],
                                             [InlineKeyboardButton(text='Back To Menu', callback_data='menu')]])
+
+def test_lvl(lvl):
+    return InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Yes', callback_data = LevelCallback(level=lvl).pack()),
+                                            InlineKeyboardButton(text='No', callback_data = 'menu')]])
+
 
 async def answer_buttons(answers, correct):
     keyboard = InlineKeyboardBuilder()
