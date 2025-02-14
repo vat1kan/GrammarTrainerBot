@@ -2,11 +2,9 @@ import botapp.keyboards as kb
 import database.requests as rq
 import botapp.level_test as lt
 from helpers.geminiRequest import get_quiz, get_word
-from aiogram import  html, F, Router, Bot
+from aiogram import  html, F, Router, Bot, types
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message, CallbackQuery, PollAnswer
-import aiocron
-import asyncio
 
 router = Router()
 
@@ -146,17 +144,17 @@ async def auto_word_sending(bot: Bot):
             print(f"\nFailed to send word message automaticaly for {user_id}:\n {e}\n")
 
 
-async def setup_cron_jobs(bot: Bot):
-    schedule = {
-        "0 10 * * *": auto_quiz_sending,
-        "0 12 * * *": auto_word_sending,
-        "0 14 * * *": auto_quiz_sending,
-        "0 16 * * *": auto_word_sending,
-        "0 18 * * *": auto_quiz_sending,
-        "0 20 * * *": auto_word_sending,
-    }
-    for time, task in schedule.items():
-        aiocron.crontab(time, func=lambda t=task: asyncio.create_task(t(bot)))
+# async def setup_cron_jobs(bot: Bot):
+#     schedule = {
+#         "0 10 * * *": auto_quiz_sending,
+#         "0 12 * * *": auto_word_sending,
+#         "0 14 * * *": auto_quiz_sending,
+#         "0 16 * * *": auto_word_sending,
+#         "0 18 * * *": auto_quiz_sending,
+#         "0 20 * * *": auto_word_sending,
+#     }
+#     for time, task in schedule.items():
+#         aiocron.crontab(time, func=lambda t=task: asyncio.create_task(t(bot)))
 
 
 async def create_quiz(bot: Bot, chat_id: int, menu: int):
@@ -173,7 +171,7 @@ async def create_quiz(bot: Bot, chat_id: int, menu: int):
         )
     except Exception as e:
         await bot.send_message(chat_id, f"#error\n\nSorry, an error occured to proccess your quiz.\n\nTry to get a new one.", reply_markup=kb.main_menu)
-        print(f"Error to send word to {chat_id}:\n{e}")
+        print(f"Error to send quiz to {chat_id}:\n{e}")
 
 
 async def create_word_message(bot: Bot, chat_id: int, menu: int):
@@ -187,5 +185,14 @@ async def create_word_message(bot: Bot, chat_id: int, menu: int):
                                                         \n{html.bold('Usage:')}\n{'\n'.join(f"{i+1}. {v}" for i, v in enumerate(data['usage']))}
                                                         \n{html.bold(html.link('EnglishGrammarBot','https://t.me/TestGrammarEnglishBot'))}  
                                                     """, reply_markup=kb.main_menu if menu == 1 else None)
+    
+
+async def stop_test_handler(callback_query: types.CallbackQuery):
+    chat_id = int(callback_query.data.split(":")[1])
+    if chat_id in lt.user_data:
+        del lt.user_data[chat_id]
+        await callback_query.message.answer("Test stopped. You can restart it anytime.", reply_markup=kb.main_menu)
+        await callback_query.answer()
 
 router.callback_query.register(update_level, kb.LevelCallback.filter())
+router.callback_query.register(stop_test_handler, lambda c: c.data.startswith("stop_test"))

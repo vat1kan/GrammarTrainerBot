@@ -1,101 +1,108 @@
 import asyncio
-import logging
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from botapp.keyboards import test_lvl
 
 questions = [
-    {"question": "What is the past participle of 'go'?", 
-     "options": ["goed", "went", "gone", "going"], 
+    {"question": "[1 / 20] She ___ to the store yesterday.",  
+     "options": ["go", "goes", "went", "going"],  
      "correct": 2, 
-     "explanation": "'Gone' is the correct past participle of 'go'."},
-
-    {"question": "Which word is a synonym for 'big'?", 
-     "options": ["tiny", "huge", "slow", "old"], 
+     "explanation": "'Went' is the correct past tense of 'go'."},
+    
+    {"question": "[2 / 20] I ___ coffee every morning.",  
+     "options": ["drink", "drank", "drinks", "drinking"],  
      "correct": 0, 
-     "explanation": "'Tiny' is the opposite of 'big', not a synonym."},
-
-    {"question": "Choose the correct article: ___ apple", 
-     "options": ["a", "an", "the", "no article"], 
-     "correct": 3, 
-     "explanation": "'No article' is incorrect; an article is required."},
-
-    {"question": "What is the comparative form of 'good'?", 
-     "options": ["gooder", "more good", "better", "best"], 
-     "correct": 1, 
-     "explanation": "'Better' is the correct comparative form of 'good'."},
-
-    {"question": "Which of these is an irregular verb?", 
-     "options": ["talk", "work", "run", "play"], 
-     "correct": 3, 
-     "explanation": "'Play' follows the regular past tense rule (played)."},
-
-    {"question": "Choose the correct preposition: 'interested ___ science'", 
-     "options": ["on", "about", "in", "for"], 
+     "explanation": "'Drink' is the correct present simple form for 'I'."},
+    
+    {"question": "[3 / 20] They ___ to the party if they had known.",  
+     "options": ["go", "gone", "would have gone", "going"],  
      "correct": 2, 
-     "explanation": "We say 'interested in' something."},
-
-    {"question": "Which sentence is correct?", 
-     "options": ["She don't like coffee.", "She doesn't like coffee.", "She not likes coffee.", "She isn't like coffee."], 
+     "explanation": "'Would have gone' is used for past hypothetical situations."},
+    
+    {"question": "[4 / 20] She ___ for a walk now.",  
+     "options": ["goes", "is going", "going", "went"],  
      "correct": 1, 
-     "explanation": "In present simple negative, use 'doesn't' + verb."},
-
-    {"question": "What is the opposite of 'fast'?", 
-     "options": ["quick", "rapid", "slow", "speedy"], 
+     "explanation": "'Is going' is the correct present continuous form."},
+    
+    {"question": "[5 / 20] I ___ my homework before dinner.",  
+     "options": ["did", "done", "do", "doing"],  
      "correct": 0, 
-     "explanation": "'Slow' is the opposite of 'fast'."},
-
-    {"question": "Which sentence is in passive voice?", 
-     "options": ["She wrote the letter.", "She will write a letter.", "She is writing a letter.", "The letter was written by her."], 
-     "correct": 3, 
-     "explanation": "'The letter was written by her' is in passive voice."},
-    {"question": "What is the past participle of 'eat'?", 
-     "options": ["ate", "eaten", "eated", "eats"], 
-     "correct": 2, 
-     "explanation": "'Eaten' is the past participle of 'eat'."},
-
-    {"question": "Choose the correct form: 'She ___ a book now.'", 
-     "options": ["reads", "is reading", "read", "reading"], 
+     "explanation": "'Did' is the correct past simple form of 'do'."},
+    
+    {"question": "[6 / 20] She has never ___ sushi before.",  
+     "options": ["eaten", "ate", "eat", "eats"],  
      "correct": 0, 
-     "explanation": "'Reads' is incorrect for present continuous."},
-
-    {"question": "What is the plural of 'child'?", 
-     "options": ["childs", "children", "childes", "childen"], 
+     "explanation": "'Eaten' is the past participle needed after 'has never'."},
+    
+    {"question": "[7 / 20] If I ___ rich, I would travel the world.",  
+     "options": ["was", "were", "am", "been"],  
      "correct": 1, 
-     "explanation": "'Children' is the irregular plural of 'child'."},
-
-    {"question": "Choose the correct phrasal verb: 'He ___ his shoes.'", 
-     "options": ["put on", "put out", "put off", "put in"], 
-     "correct": 2, 
-     "explanation": "'Put off' means to delay, not to wear clothes."},
-
-    {"question": "Which of these is a modal verb?", 
-     "options": ["run", "jump", "can", "play"], 
-     "correct": 3, 
-     "explanation": "'Can' is a modal verb used for ability or permission."},
-
-    {"question": "What is the past simple of 'buy'?", 
-     "options": ["buyed", "bought", "buys", "buy"], 
+     "explanation": "'Were' is used in second conditional sentences."},
+    
+    {"question": "[8 / 20] She ___ her keys and can’t find them.",  
+     "options": ["lost", "has lost", "loses", "losing"],  
      "correct": 1, 
-     "explanation": "'Bought' is the correct past simple of 'buy'."},
-
-    {"question": "What does 'ought to' express?", 
-     "options": ["possibility", "ability", "obligation", "future intention"], 
-     "correct": 3, 
-     "explanation": "'Ought to' is used for obligation or advice."},
-
-    {"question": "Choose the correct order of adjectives:", 
-     "options": ["a wooden old table", "a table wooden old", "an old wooden table", "a wooden table old"], 
+     "explanation": "'Has lost' is the correct present perfect form."},
+    
+    {"question": "[9 / 20] By this time next year, I ___ my degree.",  
+     "options": ["will have finished", "finish", "finishes", "finished"],  
      "correct": 0, 
-     "explanation": "The correct order is opinion, size, age, shape, color, material."},
-
-    {"question": "Which sentence uses the correct conditional form?", 
-     "options": ["If I will see him, I tell him.", "If I saw him, I tell him.", "If I see him, I'll tell him.", "If I would see him, I tell him."], 
+     "explanation": "'Will have finished' is the future perfect form."},
+    
+    {"question": "[10 / 20] I usually ___ to bed early.",  
+     "options": ["go", "goes", "gone", "going"],  
+     "correct": 0, 
+     "explanation": "'Go' is the correct present simple form."},
+    
+    {"question": "[11 / 20] She ___ studying for the exam.",  
+     "options": ["has finished", "finished", "finishing", "finishes"],  
+     "correct": 0, 
+     "explanation": "'Has finished' is present perfect for completed actions."},
+    
+    {"question": "[12 / 20] If he ___ harder, he would pass.",  
+     "options": ["studied", "studies", "study", "studying"],  
+     "correct": 0, 
+     "explanation": "'Studied' fits second conditional sentences."},
+    
+    {"question": "[13 / 20] She ___ to Paris last summer.",  
+     "options": ["went", "goes", "going", "gone"],  
+     "correct": 0, 
+     "explanation": "'Went' is past simple for completed actions."},
+    
+    {"question": "[14 / 20] We ___ here since 2010.",  
+     "options": ["live", "lived", "have lived", "living"],  
      "correct": 2, 
-     "explanation": "First conditional: 'If' + present simple, 'will' + verb."},
-
-    {"question": "Choose the correct sentence.", 
-     "options": ["She suggested me to go.", "She suggested that I go.", "She suggested me that I go.", "She suggested I to go."], 
+     "explanation": "'Have lived' is correct for actions continuing from the past."},
+    
+    {"question": "[15 / 20] He ___ a book when I called him.",  
+     "options": ["reads", "was reading", "read", "reading"],  
      "correct": 1, 
-     "explanation": "'Suggest' is followed by 'that' + base verb."}
+     "explanation": "'Was reading' is past continuous for interrupted actions."},
+    
+    {"question": "[16 / 20] This time tomorrow, we ___ on the beach.",  
+     "options": ["lie", "lying", "will be lying", "lies"],  
+     "correct": 2, 
+     "explanation": "'Will be lying' is the future continuous form."},
+    
+    {"question": "[17 / 20] The book ___ by the author in 1995.",  
+     "options": ["written", "was written", "wrote", "write"],  
+     "correct": 1, 
+     "explanation": "'Was written' is the correct past passive form."},
+    
+    {"question": "[18 / 20] She is ___ than her brother.",  
+     "options": ["more tall", "taller", "most tall", "tallest"],  
+     "correct": 1, 
+     "explanation": "'Taller' is the correct comparative form."},
+    
+    {"question": "[19 / 20] I have never ___ such a big dog!",  
+     "options": ["saw", "see", "seen", "seeing"],  
+     "correct": 2, 
+     "explanation": "'Seen' is the past participle needed after 'have never'."},
+    
+    {"question": "[20 / 20] She said she ___ come tomorrow.",  
+     "options": ["will", "would", "can", "could"],  
+     "correct": 1, 
+     "explanation": "'Would' is the correct form in reported speech."}
 ]
 
 
@@ -109,6 +116,10 @@ async def send_question(bot, chat_id, question_index):
         await send_result(bot, chat_id)
         return
     
+    keyboard = InlineKeyboardBuilder()
+    keyboard.button(text="Stop Test", callback_data=f"stop_test:{chat_id}")
+    stop_button = keyboard.as_markup()
+
     question = questions[question_index]
     poll_message = await bot.send_poll(
         chat_id,
@@ -118,7 +129,8 @@ async def send_question(bot, chat_id, question_index):
         correct_option_id=question["correct"],
         explanation=question["explanation"],
         open_period=60,
-        is_anonymous=False)
+        is_anonymous=False,
+        reply_markup=stop_button)
     
     user_data[chat_id] = user_data.get(chat_id, {"score": 0, "question_index": 0, "current_poll_id": None})
     user_data[chat_id]["current_poll_id"] = poll_message.poll.id
