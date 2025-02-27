@@ -60,3 +60,6 @@ async def get_status(tg_id: int):
 
 async def upd_status(tg_id: int):
     await User.update_status(tg_id)
+
+async def delete_user(tg_id: int):
+    await User.delete_user(tg_id)

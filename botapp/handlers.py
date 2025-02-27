@@ -5,6 +5,8 @@ from helpers.geminiRequest import get_quiz, get_word
 from aiogram import  html, F, Router, Bot, types
 from aiogram.filters import Command, CommandStart
 from aiogram.types import Message, CallbackQuery, PollAnswer
+import asyncio
+import aiogram
 
 router = Router()
 
@@ -132,6 +134,8 @@ async def auto_quiz_sending(bot: Bot):
     for user_id in users:
         try:
             await create_quiz(bot, user_id, 0)
+        except aiogram.exceptions.TelegramForbiddenError:
+            await rq.delete_user(user_id)
         except Exception as e:
             print(f"\nFailed to send quiz message automaticaly for {user_id}:\n {e}\n")
 
@@ -160,6 +164,7 @@ async def auto_word_sending(bot: Bot):
 async def create_quiz(bot: Bot, chat_id: int, menu: int):
     data = await get_quiz(await rq.get_lvl(chat_id))
     try:
+        await asyncio.sleep(1.5)
         await bot.send_poll(
             chat_id = chat_id,
             question=f"New Grammar Quiz\n\n{data['question']}",
@@ -176,6 +181,7 @@ async def create_quiz(bot: Bot, chat_id: int, menu: int):
 
 async def create_word_message(bot: Bot, chat_id: int, menu: int):
     data = await get_word()
+    await asyncio.sleep(1.1)
     await bot.send_message(chat_id, "#word\nYour new English word is here!"
                                                     f"""
                                                         \n{html.bold('Word: ')}{data['word']}

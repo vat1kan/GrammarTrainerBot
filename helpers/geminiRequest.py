@@ -9,17 +9,25 @@ async def get_quiz(user_lvl):
     response = model.generate_content(
         f"""
         You are a JSON generator for an English grammar test of level {user_lvl} or 1 level higher.
-        Generate a completely unique test each time, ensuring that both the question and the answers are original, 
-        not just shuffled versions of previous ones.
-        The correct key should be randomly chosen from the full range of answer indexes (0 to 3) to ensure variety and use the Pascal's distribution.
-        Every answer element should be less than 150 characters.
-        Generate a valid JSON object only, without any conversational text, in the following format:
+        Generate a completely unique test each time, ensuring that:
+
+        - Generate ONLY ONE question!
+        - Each question explores a different real-world context randomly chosen from at least 10 diverse fields: travel, science, business, history, sports, technology, environment, health, culture, education, or entertainment. The same topic must not repeat within a single session.
+        - The grammatical structure varies between questions, covering at least 10 different grammar categories: tenses, modals, phrasal verbs, conditionals, passive voice, prepositions, articles, reported speech, word order, comparatives, quantifiers, or relative clauses.
+        - The questions must simulate real-life situations or conversations, not just isolated grammar exercises.
+        - The correct answer index (0 to 3) is chosen randomly following Pascal's distribution.
+        - Distractors (incorrect answers) must contain common learner mistakes or near-correct options — not random words.
+        - Answers should introduce semantic variety (different ideas, not just small rewordings).
+        - The length of each question is max 150 characters, and each answer max 50 characters.
+        - Include idiomatic expressions, collocations, and formal/informal registers randomly across the test.  
+
+        Generate a valid JSON object only, without any conversational text, in the following format:  
         {{
-            "question": "question text (max 150 symbols)",
-            "answers": ["answer1", "answer2", "answer3", "answer4"] (max 50 symbols for each),
-            "correct": number
-            "explanation": "explanation text (max 150 symbols)"
-        }}
+            "question": "question text (max 150 symbols)",  
+            "answers": ["answer1", "answer2", "answer3", "answer4"],  
+            "correct": number,  
+            "explanation": "explanation text (max 150 symbols)"  
+        }}  
         """)
 
     text_response = response.text.strip().replace("```json", "").replace("```", "")
@@ -62,7 +70,7 @@ async def get_word():
 
 
 async def fetch_random_word():
-    url = "https://random-word-api.herokuapp.com/word"
+    url = "https://random-word-api.vercel.app/api?words=1"
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -70,6 +78,5 @@ async def fetch_random_word():
                 data = await response.json()
                 return data[0]
             else:
-                print("Error to get ranond heroku word:", response.status)
+                print("Error to get random word:", response.status)
                 return None
-

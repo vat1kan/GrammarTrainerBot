@@ -14,5 +14,4 @@ network:
   session_affinity: true
 
 env_variables:
-  grammarBot: 
-  geminiToken: 
+  

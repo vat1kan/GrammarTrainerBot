@@ -64,3 +64,9 @@ class User:
             current_status = doc.to_dict().get("status", True)
             await loop.run_in_executor(None, lambda: users_ref.document(str(tg_id)).update({"status": not current_status}))
 
+    @staticmethod
+    async def delete_user(chat_id: int):
+        loop = asyncio.get_running_loop()
+        await loop.run_in_executor(None, lambda: users_ref.document(str(chat_id)).delete())
+        print(f"Deleted user {chat_id} from Firestore")
+
